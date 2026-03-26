@@ -5,11 +5,12 @@
     <vendor>valentincre</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.json</depends>
 
     <resource-bundle>messages.JsonFinderBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
-        <!-- Extension points will be added in subsequent stories in this order: -->
         <!-- index → service → navigation → documentation → annotator → search → settings -->
+        <fileBasedIndex implementation="com.github.valentincre.intellijpluginjsonfinder.index.JsonKeyIndex"/>
     </extensions>
 </idea-plugin>

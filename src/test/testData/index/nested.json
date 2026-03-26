@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "login": {
+      "button": "Sign in",
+      "label": "Username"
+    },
+    "logout": {
+      "button": "Sign out"
+    }
+  },
+  "home": {
+    "title": "Welcome"
+  }
+}
