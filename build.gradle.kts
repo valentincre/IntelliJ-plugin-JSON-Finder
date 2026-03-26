@@ -135,6 +135,11 @@ tasks {
     publishPlugin {
         dependsOn(patchChangelog)
     }
+
+    test {
+        // Allow running with an empty test suite during early development
+        failOnNoDiscoveredTests = false
+    }
 }
 
 intellijPlatformTesting {
