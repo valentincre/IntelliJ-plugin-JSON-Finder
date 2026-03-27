@@ -46,4 +46,34 @@ class JsonKeyGotoHandlerTest : BasePlatformTestCase() {
         val targets = handler.getGotoDeclarationTargets(element, 0, myFixture.editor)
         assertNull(targets)
     }
+
+    // ─── Story 2.2: Single-match navigation ───────────────────────────────
+
+    fun testSingleMatchNavigatesToJsonDefinition() {
+        // Load en.json to index auth.login.button, then open a JSON consumer as the active editor.
+        // JSON string values are proper leaf PSI nodes with quotes in their text — no TypeScript plugin needed.
+        myFixture.configureByFile("single-match/en.json")
+        myFixture.configureByText("consumer.json", "{\"ref\": \"<caret>auth.login.button\"}")
+        val handler = JsonKeyGotoHandler()
+        val element = myFixture.file.findElementAt(myFixture.caretOffset)
+        val targets = handler.getGotoDeclarationTargets(element, myFixture.caretOffset, myFixture.editor)
+        assertNotNull("Expected non-null targets for single match", targets)
+        assertEquals("Expected 1 navigation target", 1, targets!!.size)
+        assertEquals("Expected target in en.json", "en.json", targets[0].containingFile.name)
+        val targetText = targets[0].text ?: ""
+        val parentText = targets[0].parent?.text ?: ""
+        assertTrue(
+            "Expected navigation target to be the 'Sign in' value node for auth.login.button",
+            targetText.contains("Sign in") || parentText.contains("Sign in"),
+        )
+    }
+
+    fun testNoMatchKeyReturnsNull() {
+        // JSON consumer value gives a proper quoted-string PSI leaf; no.match.key is not indexed
+        myFixture.configureByText("consumer.json", "{\"ref\": \"<caret>no.match.key\"}")
+        val handler = JsonKeyGotoHandler()
+        val element = myFixture.file.findElementAt(myFixture.caretOffset)
+        val targets = handler.getGotoDeclarationTargets(element, myFixture.caretOffset, myFixture.editor)
+        assertNull("Expected null when key has no definition", targets)
+    }
 }
