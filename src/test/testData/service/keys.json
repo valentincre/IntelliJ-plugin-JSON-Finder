@@ -1,0 +1,11 @@
+{
+  "auth": {
+    "login": {
+      "button": "Sign in",
+      "title": "Welcome back"
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard"
+  }
+}

@@ -139,10 +139,25 @@ tasks {
     test {
         // Allow running with an empty test suite during early development
         failOnNoDiscoveredTests = false
+        // Exclude benchmark tests from normal CI runs; run with: ./gradlew benchmarkTest
+        exclude("**/benchmark/**")
     }
+
 }
 
 intellijPlatformTesting {
+    testIde.register("benchmarkTest") {
+        task {
+            description = "Runs performance benchmark tests (excluded from normal CI)."
+            group = "verification"
+            include("**/benchmark/**")
+            failOnNoDiscoveredTests = false
+        }
+        plugins {
+            bundledPlugins(providers.gradleProperty("platformBundledPlugins").map { it.split(',') })
+        }
+    }
+
     runIde {
         register("runIdeForUiTests") {
             task {

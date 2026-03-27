@@ -12,5 +12,8 @@
     <extensions defaultExtensionNs="com.intellij">
         <!-- index → service → navigation → documentation → annotator → search → settings -->
         <fileBasedIndex implementation="com.github.valentincre.intellijpluginjsonfinder.index.JsonKeyIndex"/>
+        <projectService
+            serviceInterface="com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectService"
+            serviceImplementation="com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectServiceImpl"/>
     </extensions>
 </idea-plugin>
