@@ -15,5 +15,6 @@
         <projectService
             serviceInterface="com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectService"
             serviceImplementation="com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectServiceImpl"/>
+        <gotoDeclarationHandler implementation="com.github.valentincre.intellijpluginjsonfinder.navigation.JsonKeyGotoHandler"/>
     </extensions>
 </idea-plugin>

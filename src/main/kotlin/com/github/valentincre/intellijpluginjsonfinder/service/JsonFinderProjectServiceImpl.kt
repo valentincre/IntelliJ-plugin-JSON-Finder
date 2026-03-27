@@ -2,6 +2,7 @@ package com.github.valentincre.intellijpluginjsonfinder.service
 
 import com.github.valentincre.intellijpluginjsonfinder.index.JsonKeyIndex
 import com.github.valentincre.intellijpluginjsonfinder.util.FuzzyMatchUtil
+import com.github.valentincre.intellijpluginjsonfinder.util.KeyPathUtil
 import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.Service
 import com.intellij.openapi.project.Project
@@ -11,8 +12,6 @@ import com.intellij.util.indexing.FileBasedIndex
 
 @Service(Service.Level.PROJECT)
 class JsonFinderProjectServiceImpl(private val project: Project) : JsonFinderProjectService {
-
-    private val keyPathRegex = Regex("""^\w+(\.\w+)+$""")
 
     override fun findDefinitions(keyPath: String): List<ResolvedKeyDefinition> {
         val normalizedPath = keyPath.lowercase().trim()
@@ -63,5 +62,5 @@ class JsonFinderProjectServiceImpl(private val project: Project) : JsonFinderPro
             .map { (key, _) -> key }
     }
 
-    override fun isValidKeyPath(text: String): Boolean = keyPathRegex.matches(text.trim())
+    override fun isValidKeyPath(text: String): Boolean = KeyPathUtil.isKeyPathCandidate(text)
 }
