@@ -1,0 +1,1 @@
+{ "auth": { "login": { "button": "Sign in" } }, "dashboard": { "title": "Dashboard" }, "long": { "value": "This value is intentionally longer than one hundred characters so that the truncation logic in formatValue can be exercised by the test suite." } }

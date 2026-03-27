@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "login": {
+      "button": "Sign in"
+    }
+  },
+  "payments": {
+    "checkout": "Pay now"
+  }
+}

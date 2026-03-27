@@ -56,7 +56,27 @@ class JsonKeyGotoHandler : GotoDeclarationHandler {
                     null
                 }
             }
-            else -> null // Multi-match disambiguation handled in Story 2.3
+            else -> {
+                try {
+                    val targets = ReadAction.compute<Array<PsiElement>?, Throwable> {
+                        val resolved = definitions.mapNotNull { def ->
+                            if (!def.virtualFile.isValid) return@mapNotNull null
+                            val psiFile = PsiManager.getInstance(project).findFile(def.virtualFile)
+                                ?: return@mapNotNull null
+                            psiFile.findElementAt(def.offset)
+                        }
+                        if (resolved.isEmpty()) null else resolved.toTypedArray()
+                    }
+                    targets
+                } catch (e: ProcessCanceledException) {
+                    throw e
+                } catch (_: IndexNotReadyException) {
+                    null
+                } catch (e: Exception) {
+                    logger.warn("Failed to resolve multi-match navigation targets for '$stripped'", e)
+                    null
+                }
+            }
         }
     }
 }

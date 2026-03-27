@@ -1,0 +1,10 @@
+{
+  "auth": {
+    "login": {
+      "button": "Se connecter"
+    }
+  },
+  "payments": {
+    "checkout": "Payer"
+  }
+}

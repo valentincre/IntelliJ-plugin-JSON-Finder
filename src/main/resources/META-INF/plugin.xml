@@ -16,5 +16,11 @@
             serviceInterface="com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectService"
             serviceImplementation="com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectServiceImpl"/>
         <gotoDeclarationHandler implementation="com.github.valentincre.intellijpluginjsonfinder.navigation.JsonKeyGotoHandler"/>
+        <lang.documentationProvider
+            implementation="com.github.valentincre.intellijpluginjsonfinder.documentation.JsonKeyDocumentationProvider"
+            language="any"/>
+        <!-- search slot (Epic 4) -->
+        <searchScopesProvider implementation="com.github.valentincre.intellijpluginjsonfinder.search.JsonKeySearchScopeProvider"/>
+        <findInProjectSearchEngine implementation="com.github.valentincre.intellijpluginjsonfinder.search.JsonKeyFindInProjectSearchEngine"/>
     </extensions>
 </idea-plugin>
