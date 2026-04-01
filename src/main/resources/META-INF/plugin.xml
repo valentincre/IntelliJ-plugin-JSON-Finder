@@ -19,8 +19,13 @@
         <lang.documentationProvider
             implementation="com.github.valentincre.intellijpluginjsonfinder.documentation.JsonKeyDocumentationProvider"
             language="any"/>
+        <platform.backend.documentation.targetProvider
+            implementation="com.github.valentincre.intellijpluginjsonfinder.documentation.JsonKeyDocumentationTargetProvider"/>
         <!-- search slot (Epic 4) -->
         <searchScopesProvider implementation="com.github.valentincre.intellijpluginjsonfinder.search.JsonKeySearchScopeProvider"/>
         <findInProjectSearchEngine implementation="com.github.valentincre.intellijpluginjsonfinder.search.JsonKeyFindInProjectSearchEngine"/>
+        <searchEverywhereContributor
+            id="JsonKeySearchEverywhereContributor"
+            implementation="com.github.valentincre.intellijpluginjsonfinder.search.JsonKeySearchEverywhereContributorFactory"/>
     </extensions>
 </idea-plugin>

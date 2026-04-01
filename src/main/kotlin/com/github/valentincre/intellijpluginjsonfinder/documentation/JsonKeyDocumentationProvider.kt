@@ -25,7 +25,8 @@ class JsonKeyDocumentationProvider : AbstractDocumentationProvider() {
         targetOffset: Int,
     ): PsiElement? {
         contextElement ?: return null
-        val stripped = stripQuotes(contextElement.text ?: return null) ?: return null
+        val rawText = contextElement.text ?: return null
+        val stripped = stripQuotes(rawText) ?: return null
         if (!KeyPathUtil.isKeyPathCandidate(stripped)) return null
         return try {
             val definitions = contextElement.project
