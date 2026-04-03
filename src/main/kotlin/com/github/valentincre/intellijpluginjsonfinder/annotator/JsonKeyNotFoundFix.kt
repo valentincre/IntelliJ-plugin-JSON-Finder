@@ -29,12 +29,13 @@ class JsonKeyNotFoundFix(
         startElement: PsiElement,
         endElement: PsiElement,
     ) {
-        val document = PsiDocumentManager.getInstance(project).getDocument(file) ?: return
+        val docManager = PsiDocumentManager.getInstance(project)
+        val document = docManager.getDocument(file) ?: return
         document.replaceString(
             startElement.textRange.startOffset,
             startElement.textRange.endOffset,
             "\"$suggestion\"",
         )
-        PsiDocumentManager.getInstance(project).commitDocument(document)
+        docManager.commitDocument(document)
     }
 }
