@@ -21,6 +21,18 @@
             language="any"/>
         <platform.backend.documentation.targetProvider
             implementation="com.github.valentincre.intellijpluginjsonfinder.documentation.JsonKeyDocumentationTargetProvider"/>
+        <!-- annotator slot (Epic 5) -->
+        <!-- language="any" does not trigger the annotator in IntelliJ 2025.2; registering for each target language explicitly -->
+        <annotator language="JSON"
+                   implementationClass="com.github.valentincre.intellijpluginjsonfinder.annotator.JsonKeyAnnotator"/>
+        <annotator language="TypeScript"
+                   implementationClass="com.github.valentincre.intellijpluginjsonfinder.annotator.JsonKeyAnnotator"/>
+        <annotator language="JavaScript 1.8.5"
+                   implementationClass="com.github.valentincre.intellijpluginjsonfinder.annotator.JsonKeyAnnotator"/>
+        <annotator language="kotlin"
+                   implementationClass="com.github.valentincre.intellijpluginjsonfinder.annotator.JsonKeyAnnotator"/>
+        <annotator language="JAVA"
+                   implementationClass="com.github.valentincre.intellijpluginjsonfinder.annotator.JsonKeyAnnotator"/>
         <!-- search slot (Epic 4) -->
         <searchScopesProvider implementation="com.github.valentincre.intellijpluginjsonfinder.search.JsonKeySearchScopeProvider"/>
         <findInProjectSearchEngine implementation="com.github.valentincre.intellijpluginjsonfinder.search.JsonKeyFindInProjectSearchEngine"/>
