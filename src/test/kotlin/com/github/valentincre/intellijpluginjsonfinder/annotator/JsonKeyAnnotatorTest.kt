@@ -19,23 +19,34 @@ class JsonKeyAnnotatorTest : BasePlatformTestCase() {
     override fun getTestDataPath() = "src/test/testData/annotator"
 
     // Records annotations produced by a single annotator.annotate() call.
-    private data class CapturedAnnotation(val severity: HighlightSeverity, val description: String)
+    private data class CapturedAnnotation(
+        val severity: HighlightSeverity,
+        val description: String,
+        val fixNames: List<String> = emptyList(),
+    )
 
     // Creates a self-referential AnnotationBuilder proxy: fluent methods return the SAME proxy so
     // that create() is always called on the proxy that captured severity/message.
+    // withFix() calls accumulate fix names before create() snapshots them into CapturedAnnotation.
     private fun builderProxy(
         severity: HighlightSeverity,
         message: String,
         captured: MutableList<CapturedAnnotation>,
     ): AnnotationBuilder {
         // Use an array cell to hold the proxy reference before it is assigned (avoids circular init).
+        val accumulatedFixes = mutableListOf<String>()
         val ref = arrayOfNulls<Any>(1)
         ref[0] = Proxy.newProxyInstance(
             AnnotationBuilder::class.java.classLoader,
             arrayOf(AnnotationBuilder::class.java),
-        ) { _, method: Method, _ ->
+        ) { _, method: Method, args ->
             when (method.name) {
-                "create" -> { captured.add(CapturedAnnotation(severity, message)); null }
+                "create" -> { captured.add(CapturedAnnotation(severity, message, accumulatedFixes.toList())); null }
+                "withFix" -> {
+                    val fix = args?.getOrNull(0) as? com.intellij.codeInsight.intention.IntentionAction
+                    if (fix != null) accumulatedFixes.add(fix.text)
+                    ref[0]
+                }
                 // All fluent methods return the SAME proxy to preserve the captured state.
                 else -> ref[0]
             }
@@ -204,5 +215,52 @@ class JsonKeyAnnotatorTest : BasePlatformTestCase() {
             "Expected no warning for 'auth.login' when its parent is a concatenation (Binary) expression",
             captured.isEmpty(),
         )
+    }
+
+    // ─── Quick-fix suggestions (Story 5.3) ───────────────────────────────────
+
+    fun testBrokenKeyWithSuggestionProducesQuickFix() {
+        // "auth.login.btn" is not in the index; "auth.login.button" IS indexed in en.json.
+        // segmentLevenshtein("auth.login.btn", "auth.login.button") = 3 (same 3 segments, edit distance on "btn"→"button").
+        myFixture.configureByFile("en.json")
+        myFixture.configureByText("consumer.json", """{"ref": "<caret>auth.login.btn"}""")
+        val annotations = annotateAtCaret().filter { it.severity == HighlightSeverity.WARNING }
+        assertTrue("Expected WARNING for broken key 'auth.login.btn'", annotations.isNotEmpty())
+        val fixes = annotations.first().fixNames
+        assertTrue(
+            "Expected quick-fix suggestion containing 'auth.login.button', got: $fixes",
+            fixes.any { it.contains("auth.login.button") },
+        )
+    }
+
+    fun testBrokenKeyWithNoSuggestionHasNoFixes() {
+        // "zzz.yyy.xxx.www" has 4 segments — neither "auth.login.button" (3 segments) nor
+        // "dashboard.title" (2 segments) share the same segment count, so both score
+        // SEGMENT_MISMATCH_PENALTY and are filtered out by Tier 2. Tier 1 (NameUtil) also
+        // finds no match → zero quick-fixes expected.
+        myFixture.configureByFile("en.json")
+        myFixture.configureByText("consumer.json", """{"ref": "<caret>zzz.yyy.xxx.www"}""")
+        val annotations = annotateAtCaret().filter { it.severity == HighlightSeverity.WARNING }
+        assertTrue("Expected WARNING for broken key 'zzz.yyy.xxx.www'", annotations.isNotEmpty())
+        assertTrue(
+            "Expected no quick-fixes for key with no close match",
+            annotations.first().fixNames.isEmpty(),
+        )
+    }
+
+    fun testQuickFixReplacesTextInFile() {
+        // Verifies that JsonKeyNotFoundFix.invoke() replaces the broken key text in the document.
+        myFixture.configureByFile("en.json")
+        myFixture.configureByText("consumer.json", """{"ref": "<caret>auth.login.btn"}""")
+        val element = checkNotNull(myFixture.file.findElementAt(myFixture.caretOffset)) {
+            "No element at caret offset"
+        }
+        val fix = JsonKeyNotFoundFix(element, "auth.login.button")
+        com.intellij.openapi.command.WriteCommandAction.runWriteCommandAction(myFixture.project) {
+            // LocalQuickFixOnPsiElement.invoke(project, editor, file) resolves the smart pointer
+            // and delegates to invoke(project, file, startElement, endElement).
+            fix.invoke(myFixture.project, myFixture.editor, myFixture.file)
+        }
+        assertEquals("""{"ref": "auth.login.button"}""", myFixture.file.text)
     }
 }

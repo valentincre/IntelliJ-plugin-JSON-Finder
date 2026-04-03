@@ -39,9 +39,17 @@ class JsonFinderProjectServiceImpl(private val project: Project) : JsonFinderPro
         val normalizedQuery = keyPath.lowercase().trim()
         if (normalizedQuery.isEmpty()) return emptyList()
         val allKeys = ReadAction.compute<List<String>, Throwable> {
+            val scope = GlobalSearchScope.allScope(project)
+            val fbi = FileBasedIndex.getInstance()
             val keys = mutableListOf<String>()
-            FileBasedIndex.getInstance().processAllKeys(JsonKeyIndex.KEY, { key ->
-                keys.add(key)
+            fbi.processAllKeys(JsonKeyIndex.KEY, { key ->
+                // Only include keys that have a backing file within the project scope.
+                // processAllKeys(project) can return keys from IntelliJ's global shared index or
+                // other open projects — verifying via getContainingFiles guarantees we only
+                // suggest keys that actually exist in this project.
+                if (fbi.getContainingFiles(JsonKeyIndex.KEY, key, scope).isNotEmpty()) {
+                    keys.add(key)
+                }
                 true
             }, project)
             keys

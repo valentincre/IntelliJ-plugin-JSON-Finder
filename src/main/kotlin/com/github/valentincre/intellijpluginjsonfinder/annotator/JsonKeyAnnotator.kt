@@ -43,11 +43,16 @@ class JsonKeyAnnotator : Annotator {
         // Skip during dumb mode (initial indexing) — index is not ready yet.
         if (DumbService.isDumb(project)) return
         try {
-            val definitions = project.service<JsonFinderProjectService>().findDefinitions(stripped)
+            val service = project.service<JsonFinderProjectService>()
+            val definitions = service.findDefinitions(stripped)
             if (definitions.isEmpty()) {
-                holder.newAnnotation(HighlightSeverity.WARNING, "Unresolved JSON key: '$stripped'")
+                val suggestions = service.suggestSimilar(stripped, maxResults = 5)
+                val builder = holder.newAnnotation(HighlightSeverity.WARNING, "Unresolved JSON key: '$stripped'")
                     .range(element.textRange)
-                    .create()
+                suggestions.forEach { suggestion ->
+                    builder.withFix(JsonKeyNotFoundFix(element, suggestion))
+                }
+                builder.create()
             }
         } catch (e: ProcessCanceledException) {
             throw e
