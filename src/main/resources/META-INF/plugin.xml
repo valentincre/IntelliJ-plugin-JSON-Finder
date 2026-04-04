@@ -39,5 +39,12 @@
         <searchEverywhereContributor
             id="JsonKeySearchEverywhereContributor"
             implementation="com.github.valentincre.intellijpluginjsonfinder.search.JsonKeySearchEverywhereContributorFactory"/>
+        <!-- settings slot (Epic 6) -->
+        <projectService serviceImplementation="com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings"/>
+        <projectConfigurable
+            id="com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderConfigurable"
+            instance="com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderConfigurable"
+            displayName="JSON Finder"
+            groupId="tools"/>
     </extensions>
 </idea-plugin>
