@@ -1,8 +1,10 @@
 package com.github.valentincre.intellijpluginjsonfinder.settings
 
+import com.github.valentincre.intellijpluginjsonfinder.index.JsonKeyIndex
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
+import com.intellij.util.indexing.FileBasedIndex
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
@@ -46,6 +48,8 @@ class JsonFinderConfigurable(private val project: Project) : Configurable {
                 excludePatterns = parsePatterns(excludeArea?.text),
             )
         )
+        // Trigger index rebuild so new patterns take effect immediately (FR26)
+        FileBasedIndex.getInstance().requestRebuild(JsonKeyIndex.KEY)
     }
 
     override fun reset() {

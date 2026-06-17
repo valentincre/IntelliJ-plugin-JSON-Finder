@@ -1,7 +1,17 @@
 <!-- Keep a Changelog guide -> https://keepachangelog.com -->
 
-# IntelliJ-plugin-JSON-Finder Changelog
+# JSON Finder Changelog
 
 ## [Unreleased]
+
+## [0.0.1] - 2026-06-17
 ### Added
-- Initial scaffold created from [IntelliJ Platform Plugin Template](https://github.com/JetBrains/intellij-platform-plugin-template)
+
+- Background indexing of dotted-path JSON keys across the project using IntelliJ's `FileBasedIndex`; index updates incrementally on file change
+- Cmd+Click (Ctrl+Click) navigation from any string literal containing a dotted path to the matching JSON key definition; disambiguation popup when multiple matches exist
+- Hover preview showing the resolved JSON value for the key under the cursor
+- Inline warnings on unresolved dotted-path keys with fuzzy "did you mean?" quick-fix suggestions (Levenshtein + segment-aware matching)
+- "JSON Keys" custom search scope for filtering Find in Files results to JSON key definitions
+- Search Everywhere integration — search JSON keys by name from the global search dialog
+- Per-project settings UI to configure include/exclude glob patterns, restricting the index to the relevant JSON files in non-standard project structures
+- Compatible with IntelliJ IDEA, WebStorm, and all JetBrains IDEs 2025.1+

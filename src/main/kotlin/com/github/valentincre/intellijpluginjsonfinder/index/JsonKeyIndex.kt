@@ -1,5 +1,9 @@
 package com.github.valentincre.intellijpluginjsonfinder.index
 
+import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
+import com.intellij.openapi.components.service
+import com.intellij.openapi.project.ProjectManager
+import com.intellij.openapi.roots.ProjectFileIndex
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.indexing.DataIndexer
 import com.intellij.util.indexing.FileBasedIndex
@@ -21,23 +25,15 @@ import java.io.DataOutput
  *
  * Persistence is handled automatically by the IntelliJ platform; the index survives IDE restarts
  * without a full re-index (AC 2). VFS events trigger incremental updates automatically (AC 3).
+ *
+ * Include/exclude patterns are read from JsonFinderSettings at filter time so that changes
+ * in Settings take effect after the next requestRebuild() call without an IDE restart (AC 1, 4, 5).
  */
 class JsonKeyIndex : FileBasedIndexExtension<String, List<JsonKeyEntry>>() {
 
     companion object {
         val KEY: ID<String, List<JsonKeyEntry>> = ID.create("JsonKeyIndex")
-        private const val INDEX_VERSION = 1
-
-        // Default exclude patterns — hard-coded for this story (Settings integration in Epic 6).
-        private val DEFAULT_EXCLUDED_NAMES = setOf(
-            "package.json",
-            "project.json",
-            "tsconfig.json",
-            "jest.config.js",
-            "jest.config.ts",
-            "jest.config.mjs",
-            "jest.config.cjs",
-        )
+        private const val INDEX_VERSION = 2  // bumped from 1: now reads settings glob patterns
     }
 
     override fun getName(): ID<String, List<JsonKeyEntry>> = KEY
@@ -53,14 +49,40 @@ class JsonKeyIndex : FileBasedIndexExtension<String, List<JsonKeyEntry>>() {
     override fun getValueExternalizer(): DataExternalizer<List<JsonKeyEntry>> = JsonKeyEntryListExternalizer
 
     override fun getInputFilter(): FileBasedIndex.InputFilter = FileBasedIndex.InputFilter { file ->
-        file.extension == "json" && !isExcluded(file)
+        val openProjects = ProjectManager.getInstance().openProjects.filter { !it.isDisposed }
+        // Prefer the project whose content root contains this file; fall back to the first open project.
+        val project = openProjects.firstOrNull { ProjectFileIndex.getInstance(it).isInContent(file) }
+            ?: openProjects.firstOrNull()
+            ?: return@InputFilter false
+        val settings = project.service<JsonFinderSettings>().state
+        val basePath = project.basePath
+        matchesInclude(file, settings.includePatterns, basePath) && !matchesExclude(file, settings.excludePatterns, basePath)
     }
 
-    private fun isExcluded(file: VirtualFile): Boolean {
-        val path = file.path
-        return path.contains("/node_modules/") ||
-            DEFAULT_EXCLUDED_NAMES.contains(file.name) ||
-            file.name.startsWith("tsconfig")
+    private fun matchesInclude(file: VirtualFile, patterns: List<String>, basePath: String?): Boolean {
+        if (patterns.isEmpty()) return false
+        return matchesAny(file, patterns, basePath)
+    }
+
+    private fun matchesExclude(file: VirtualFile, patterns: List<String>, basePath: String?): Boolean {
+        if (patterns.isEmpty()) return false
+        return matchesAny(file, patterns, basePath)
+    }
+
+    // Returns true if the file matches any of the given glob patterns.
+    // Patterns are matched against both the relative path from the project root (for patterns like
+    // "src/i18n/**/*.json") and the absolute path (for patterns like "**/*.json").
+    private fun matchesAny(file: VirtualFile, patterns: List<String>, basePath: String?): Boolean {
+        val absolutePath = java.nio.file.Paths.get(file.path)
+        val relativePath = basePath?.let {
+            runCatching { java.nio.file.Paths.get(it).relativize(absolutePath) }.getOrNull()
+        }
+        return patterns.any { pattern ->
+            runCatching {
+                val matcher = java.nio.file.FileSystems.getDefault().getPathMatcher("glob:$pattern")
+                (relativePath != null && matcher.matches(relativePath)) || matcher.matches(absolutePath)
+            }.getOrDefault(false)
+        }
     }
 }
 
