@@ -4,10 +4,10 @@ import com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProject
 import com.github.valentincre.intellijpluginjsonfinder.util.KeyPathUtil
 import com.intellij.codeInsight.navigation.actions.GotoDeclarationHandler
 import com.intellij.navigation.ItemPresentation
-import com.intellij.openapi.application.ReadAction
 import com.intellij.openapi.components.service
 import com.intellij.openapi.diagnostic.thisLogger
 import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.fileEditor.OpenFileDescriptor
 import com.intellij.openapi.progress.ProcessCanceledException
 import com.intellij.openapi.project.IndexNotReadyException
 import com.intellij.psi.NavigatablePsiElement
@@ -28,12 +28,28 @@ private class JsonKeyNavigationTarget(
         override fun getIcon(unused: Boolean) = delegate.containingFile?.getIcon(0)
     }
 
+    // findElementAt() returns a LeafPsiElement which does not implement NavigatablePsiElement,
+    // so casting would silently fail. Navigate via OpenFileDescriptor instead.
     override fun navigate(requestFocus: Boolean) {
-        (delegate as? NavigatablePsiElement)?.navigate(requestFocus)
+        val vFile = delegate.containingFile?.virtualFile ?: return
+        OpenFileDescriptor(delegate.project, vFile, delegate.textOffset).navigate(requestFocus)
     }
 
-    override fun canNavigate(): Boolean = (delegate as? NavigatablePsiElement)?.canNavigate() ?: false
-    override fun canNavigateToSource(): Boolean = (delegate as? NavigatablePsiElement)?.canNavigateToSource() ?: false
+    override fun canNavigate(): Boolean = delegate.containingFile?.virtualFile != null
+    override fun canNavigateToSource(): Boolean = delegate.containingFile?.virtualFile != null
+
+    // Explicit overrides required because Kotlin's `by delegate` generates forwarding stubs for ALL
+    // PsiElement methods, including deprecated ones. Without these, the compiler emits OVERRIDE_DEPRECATION.
+    // When checkDelete/checkAdd are eventually removed from PsiElement, these will become compile errors — intentional.
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+    override fun checkDelete() {
+        delegate.checkDelete()
+    }
+
+    @Suppress("DEPRECATION", "OVERRIDE_DEPRECATION")
+    override fun checkAdd(element: PsiElement) {
+        delegate.checkAdd(element)
+    }
 }
 
 class JsonKeyGotoHandler : GotoDeclarationHandler {
@@ -57,6 +73,8 @@ class JsonKeyGotoHandler : GotoDeclarationHandler {
         if (!KeyPathUtil.isKeyPathCandidate(stripped)) return null
 
         val project = sourceElement.project
+        // The IDE already holds a read lock when invoking GotoDeclarationHandler —
+        // no explicit ReadAction wrapper is needed here.
         val definitions = project.service<JsonFinderProjectService>().findDefinitions(stripped)
 
         return when (definitions.size) {
@@ -64,13 +82,11 @@ class JsonKeyGotoHandler : GotoDeclarationHandler {
             1 -> {
                 val def = definitions.first()
                 try {
-                    ReadAction.compute<Array<PsiElement>?, Throwable> {
-                        if (!def.virtualFile.isValid) return@compute null
-                        val psiFile = PsiManager.getInstance(project).findFile(def.virtualFile)
-                            ?: return@compute null
-                        val element = psiFile.findElementAt(def.offset) ?: return@compute null
-                        arrayOf(element)
-                    }
+                    if (!def.virtualFile.isValid) return null
+                    val psiFile = PsiManager.getInstance(project).findFile(def.virtualFile)
+                        ?: return null
+                    val element = psiFile.findElementAt(def.offset) ?: return null
+                    arrayOf(element)
                 } catch (e: ProcessCanceledException) {
                     throw e
                 } catch (_: IndexNotReadyException) {
@@ -82,17 +98,14 @@ class JsonKeyGotoHandler : GotoDeclarationHandler {
             }
             else -> {
                 try {
-                    val targets = ReadAction.compute<Array<PsiElement>?, Throwable> {
-                        val resolved = definitions.mapNotNull { def ->
-                            if (!def.virtualFile.isValid) return@mapNotNull null
-                            val psiFile = PsiManager.getInstance(project).findFile(def.virtualFile)
-                                ?: return@mapNotNull null
-                            val element = psiFile.findElementAt(def.offset) ?: return@mapNotNull null
-                            JsonKeyNavigationTarget(element)
-                        }
-                        if (resolved.isEmpty()) null else resolved.toTypedArray()
+                    val resolved = definitions.mapNotNull { def ->
+                        if (!def.virtualFile.isValid) return@mapNotNull null
+                        val psiFile = PsiManager.getInstance(project).findFile(def.virtualFile)
+                            ?: return@mapNotNull null
+                        val element = psiFile.findElementAt(def.offset) ?: return@mapNotNull null
+                        JsonKeyNavigationTarget(element)
                     }
-                    targets
+                    if (resolved.isEmpty()) null else resolved.toTypedArray()
                 } catch (e: ProcessCanceledException) {
                     throw e
                 } catch (_: IndexNotReadyException) {

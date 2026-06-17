@@ -23,6 +23,7 @@ import com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProject
  *
  * For all other scopes, returns null to fall through to the default text engine.
  */
+@Suppress("UnstableApiUsage")
 class JsonKeyFindInProjectSearchEngine : FindInProjectSearchEngine {
 
     override fun createSearcher(
@@ -35,6 +36,7 @@ class JsonKeyFindInProjectSearchEngine : FindInProjectSearchEngine {
     }
 }
 
+@Suppress("UnstableApiUsage")
 private class JsonKeySearcher(
     private val findModel: FindModel,
     private val project: Project,
@@ -45,7 +47,7 @@ private class JsonKeySearcher(
         val query = findModel.stringToFind.lowercase().trim()
         if (query.isBlank()) return emptyList()
 
-        return ReadAction.compute<Collection<VirtualFile>, Throwable> {
+        return ReadAction.nonBlocking<Collection<VirtualFile>> {
             try {
                 val allKeys = FileBasedIndex.getInstance()
                     .getAllKeys(JsonKeyIndex.KEY, project)
@@ -64,7 +66,7 @@ private class JsonKeySearcher(
                 thisLogger().error("JsonKey search failed for query '$query'", e)
                 throw e
             }
-        }
+        }.executeSynchronously()
     }
 
     override fun isCovered(file: VirtualFile): Boolean = scope.contains(file)
