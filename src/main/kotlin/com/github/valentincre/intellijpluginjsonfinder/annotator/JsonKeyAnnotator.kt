@@ -39,6 +39,21 @@ class JsonKeyAnnotator : Annotator {
 
         if (!KeyPathUtil.isKeyPathCandidate(stripped)) return
 
+        // Skip leaf tokens whose parent node wraps the exact same string literal text.
+        // In many language PSI trees (JS, TS, Kotlin) both the expression node and its inner
+        // leaf token share identical text, which would produce two annotations at the same range.
+        val parentRaw = element.parent?.text ?: ""
+        val parentStripped = when {
+            parentRaw.length >= 2 && parentRaw.startsWith('"') && parentRaw.endsWith('"') ->
+                parentRaw.substring(1, parentRaw.length - 1)
+
+            parentRaw.length >= 2 && parentRaw.startsWith('\'') && parentRaw.endsWith('\'') ->
+                parentRaw.substring(1, parentRaw.length - 1)
+
+            else -> null
+        }
+        if (parentStripped == stripped) return
+
         val project = element.project
         // Skip during dumb mode (initial indexing) — index is not ready yet.
         if (DumbService.isDumb(project)) return

@@ -1,6 +1,7 @@
 package com.github.valentincre.intellijpluginjsonfinder.index
 
 import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
+import com.intellij.json.JsonFileType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.roots.ProjectFileIndex
@@ -49,6 +50,7 @@ class JsonKeyIndex : FileBasedIndexExtension<String, List<JsonKeyEntry>>() {
     override fun getValueExternalizer(): DataExternalizer<List<JsonKeyEntry>> = JsonKeyEntryListExternalizer
 
     override fun getInputFilter(): FileBasedIndex.InputFilter = FileBasedIndex.InputFilter { file ->
+        if (file.fileType != JsonFileType.INSTANCE) return@InputFilter false
         val openProjects = ProjectManager.getInstance().openProjects.filter { !it.isDisposed }
         // Prefer the project whose content root contains this file; fall back to the first open project.
         val project = openProjects.firstOrNull { ProjectFileIndex.getInstance(it).isInContent(file) }
