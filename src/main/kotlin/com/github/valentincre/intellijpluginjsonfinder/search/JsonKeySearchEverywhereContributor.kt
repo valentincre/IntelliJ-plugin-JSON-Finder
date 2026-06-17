@@ -30,7 +30,6 @@ class JsonKeySearchEverywhereContributor(
     override fun showInFindResults(): Boolean = false
     override fun isDumbAware(): Boolean = false
     override fun isMultiSelectionSupported(): Boolean = false
-    override fun getDataForItem(element: ResolvedKeyDefinition, dataId: String): Any? = null
 
     override fun fetchElements(
         pattern: String,
@@ -41,7 +40,7 @@ class JsonKeySearchEverywhereContributor(
         if (query.isBlank()) return
 
         val results = try {
-            ReadAction.compute<List<ResolvedKeyDefinition>, Throwable> {
+            ReadAction.nonBlocking<List<ResolvedKeyDefinition>> {
                 val matchingKeys = mutableListOf<String>()
                 FileBasedIndex.getInstance().processAllKeys(JsonKeyIndex.KEY, { key ->
                     if (key.lowercase().contains(query)) matchingKeys.add(key)
@@ -50,7 +49,7 @@ class JsonKeySearchEverywhereContributor(
                 matchingKeys
                     .flatMap { key -> project.service<JsonFinderProjectService>().findDefinitions(key) }
                     .sortedBy { it.virtualFile.path }
-            }
+            }.executeSynchronously()
         } catch (e: ProcessCanceledException) {
             throw e
         } catch (e: IndexNotReadyException) {

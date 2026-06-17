@@ -18,6 +18,7 @@ import com.intellij.psi.PsiFile
 // New-API documentation provider for IntelliJ 252+.
 // AbstractDocumentationProvider.getCustomDocumentationElement is no longer reliably called
 // in the JSON documentation flow; DocumentationTargetProvider is the correct hook.
+@Suppress("UnstableApiUsage")
 class JsonKeyDocumentationTargetProvider : DocumentationTargetProvider {
 
     override fun documentationTargets(file: PsiFile, offset: Int): List<DocumentationTarget> {
@@ -54,6 +55,7 @@ class JsonKeyDocumentationTargetProvider : DocumentationTargetProvider {
     }
 }
 
+@Suppress("UnstableApiUsage")
 class JsonKeyDocumentationTarget(
     private val keyPath: String,
     private val definitions: List<ResolvedKeyDefinition>,

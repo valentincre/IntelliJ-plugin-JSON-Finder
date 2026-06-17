@@ -1,5 +1,7 @@
 package com.github.valentincre.intellijpluginjsonfinder.index
 
+import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
+import com.intellij.openapi.components.service
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.indexing.FileBasedIndex
 import com.intellij.util.indexing.FileContentImpl
@@ -155,5 +157,119 @@ class JsonKeyIndexTest : BasePlatformTestCase() {
         assertNotNull("Entry for 'key' must exist", entry)
         // Offset must be positive (the value "value" starts after {"key": )
         assertTrue("Offset must be a non-negative position in the file", entry!!.offset >= 0)
+    }
+
+    // ─── Test 8: Settings include pattern accepts matching JSON file (AC 1) ───
+
+    fun testSettingsIncludePatternAcceptsMatchingFile() {
+        val settings = project.service<JsonFinderSettings>()
+        val originalState = settings.state
+        try {
+            settings.loadState(
+                JsonFinderSettings.State(
+                    includePatterns = listOf("**/*.json"),
+                    excludePatterns = emptyList()
+                )
+            )
+            val file = myFixture.configureByText("locale.json", """{"greeting": "Hello"}""").virtualFile
+            val filter = JsonKeyIndex().getInputFilter()
+            assertTrue("File matching include pattern must be accepted by the filter", filter.acceptInput(file))
+        } finally {
+            settings.loadState(originalState)
+        }
+    }
+
+    // ─── Test 9: Settings exclude pattern rejects file (AC 5) ─────────────────
+
+    fun testSettingsExcludePatternRejectsMatchingFile() {
+        val settings = project.service<JsonFinderSettings>()
+        val originalState = settings.state
+        try {
+            settings.loadState(
+                JsonFinderSettings.State(
+                    includePatterns = listOf("**/*.json"),
+                    excludePatterns = listOf("**/excluded.json")
+                )
+            )
+            val file = myFixture.configureByText("excluded.json", """{"secret": "hidden"}""").virtualFile
+            val filter = JsonKeyIndex().getInputFilter()
+            assertFalse("File matching exclude pattern must be rejected by the filter", filter.acceptInput(file))
+        } finally {
+            settings.loadState(originalState)
+        }
+    }
+
+    // ─── Test 10: Empty include patterns reject all files (AC 1) ──────────────
+
+    fun testEmptyIncludePatternsRejectAllFiles() {
+        val settings = project.service<JsonFinderSettings>()
+        val originalState = settings.state
+        try {
+            settings.loadState(
+                JsonFinderSettings.State(
+                    includePatterns = emptyList(),
+                    excludePatterns = emptyList()
+                )
+            )
+            val file = myFixture.configureByText("any.json", """{"key": "value"}""").virtualFile
+            val filter = JsonKeyIndex().getInputFilter()
+            assertFalse("Empty include patterns must cause all files to be rejected", filter.acceptInput(file))
+        } finally {
+            settings.loadState(originalState)
+        }
+    }
+
+    // ─── Test 11: Previously excluded file included after pattern change (AC 4) ─
+
+    fun testPreviouslyExcludedFileAcceptedAfterPatternChange() {
+        val settings = project.service<JsonFinderSettings>()
+        val originalState = settings.state
+        try {
+            // Phase 1: exclude.json is excluded
+            settings.loadState(
+                JsonFinderSettings.State(
+                    includePatterns = listOf("**/*.json"),
+                    excludePatterns = listOf("**/excluded.json")
+                )
+            )
+            val file = myFixture.configureByText("excluded.json", """{"key": "value"}""").virtualFile
+            val filter1 = JsonKeyIndex().getInputFilter()
+            assertFalse("File must be rejected when in exclude list", filter1.acceptInput(file))
+
+            // Phase 2: pattern changed — excluded.json is no longer excluded
+            settings.loadState(
+                JsonFinderSettings.State(
+                    includePatterns = listOf("**/*.json"),
+                    excludePatterns = emptyList()
+                )
+            )
+            val filter2 = JsonKeyIndex().getInputFilter()
+            assertTrue("File must be accepted after exclude pattern is removed", filter2.acceptInput(file))
+        } finally {
+            settings.loadState(originalState)
+        }
+    }
+
+    // ─── Test 12: Relative glob pattern (e.g. src/**/*.json) matches via project-root relativization ─
+
+    fun testRelativeGlobPatternMatchesFileInSubdirectory() {
+        val settings = project.service<JsonFinderSettings>()
+        val originalState = settings.state
+        try {
+            settings.loadState(
+                JsonFinderSettings.State(
+                    includePatterns = listOf("src/**/*.json"),
+                    excludePatterns = emptyList()
+                )
+            )
+            val file = myFixture.addFileToProject("src/i18n/messages.json", """{"hello": "world"}""").virtualFile
+            val filter = JsonKeyIndex().getInputFilter()
+            assertTrue(
+                "File inside src/ must be accepted by relative pattern 'src/**/*.json'",
+                filter.acceptInput(file)
+            )
+        } finally {
+            settings.loadState(originalState)
+        }
     }
 }
