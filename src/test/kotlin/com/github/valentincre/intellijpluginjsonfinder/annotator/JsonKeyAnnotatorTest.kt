@@ -78,10 +78,15 @@ class JsonKeyAnnotatorTest : BasePlatformTestCase() {
     }
 
     // Calls the annotator directly on the element at the current caret position.
+    // findElementAt() returns the deepest leaf; walk up one level when the parent is a composite
+    // string literal node with identical text — this mirrors what the real annotator framework does
+    // (it visits every node, so the composite expression is annotated, not the raw leaf token).
     private fun annotateAtCaret(): List<CapturedAnnotation> {
-        val element = checkNotNull(myFixture.file.findElementAt(myFixture.caretOffset)) {
+        val leaf = checkNotNull(myFixture.file.findElementAt(myFixture.caretOffset)) {
             "No element at caret offset"
         }
+        val parent = leaf.parent
+        val element = if (parent != null && parent.text == leaf.text) parent else leaf
         val captured = mutableListOf<CapturedAnnotation>()
         JsonKeyAnnotator().annotate(element, recordingHolder(captured))
         return captured

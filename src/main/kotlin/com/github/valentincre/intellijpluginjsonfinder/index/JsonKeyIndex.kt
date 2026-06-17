@@ -1,10 +1,10 @@
 package com.github.valentincre.intellijpluginjsonfinder.index
 
 import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
-import com.intellij.json.JsonFileType
 import com.intellij.openapi.components.service
 import com.intellij.openapi.project.ProjectManager
 import com.intellij.openapi.roots.ProjectFileIndex
+import com.intellij.openapi.roots.ProjectRootManager
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.indexing.DataIndexer
 import com.intellij.util.indexing.FileBasedIndex
@@ -50,7 +50,7 @@ class JsonKeyIndex : FileBasedIndexExtension<String, List<JsonKeyEntry>>() {
     override fun getValueExternalizer(): DataExternalizer<List<JsonKeyEntry>> = JsonKeyEntryListExternalizer
 
     override fun getInputFilter(): FileBasedIndex.InputFilter = FileBasedIndex.InputFilter { file ->
-        if (file.fileType != JsonFileType.INSTANCE) return@InputFilter false
+        if (file.extension?.lowercase() != "json") return@InputFilter false
         val openProjects = ProjectManager.getInstance().openProjects.filter { !it.isDisposed }
         // Prefer the project whose content root contains this file; fall back to the first open project.
         val project = openProjects.firstOrNull { ProjectFileIndex.getInstance(it).isInContent(file) }
@@ -58,6 +58,7 @@ class JsonKeyIndex : FileBasedIndexExtension<String, List<JsonKeyEntry>>() {
             ?: return@InputFilter false
         val settings = project.service<JsonFinderSettings>().state
         val basePath = project.basePath
+            ?: ProjectRootManager.getInstance(project).contentRoots.firstOrNull()?.path
         matchesInclude(file, settings.includePatterns, basePath) && !matchesExclude(file, settings.excludePatterns, basePath)
     }
 
@@ -74,15 +75,27 @@ class JsonKeyIndex : FileBasedIndexExtension<String, List<JsonKeyEntry>>() {
     // Returns true if the file matches any of the given glob patterns.
     // Patterns are matched against both the relative path from the project root (for patterns like
     // "src/i18n/**/*.json") and the absolute path (for patterns like "**/*.json").
+    // Relative path is computed via string prefix removal rather than Paths.relativize() to avoid
+    // IllegalArgumentException on macOS where /var/ and /private/var/ are symlinked differently.
     private fun matchesAny(file: VirtualFile, patterns: List<String>, basePath: String?): Boolean {
-        val absolutePath = java.nio.file.Paths.get(file.path)
-        val relativePath = basePath?.let {
-            runCatching { java.nio.file.Paths.get(it).relativize(absolutePath) }.getOrNull()
-        }
+        val filePath = file.path
+        val absolutePath = java.nio.file.Paths.get(filePath)
+        val relativePath = if (basePath != null) {
+            val normalizedBase = if (basePath.endsWith("/")) basePath else "$basePath/"
+            if (filePath.startsWith(normalizedBase)) {
+                runCatching { java.nio.file.Paths.get(filePath.removePrefix(normalizedBase)) }.getOrNull()
+            } else null
+        } else null
         return patterns.any { pattern ->
             runCatching {
-                val matcher = java.nio.file.FileSystems.getDefault().getPathMatcher("glob:$pattern")
-                (relativePath != null && matcher.matches(relativePath)) || matcher.matches(absolutePath)
+                val fs = java.nio.file.FileSystems.getDefault()
+                val matcher = fs.getPathMatcher("glob:$pattern")
+                // Prepend **/ so that relative patterns like "src/**/*.json" also match against
+                // absolute paths ("/project/src/i18n/en.json") when no relative path is available.
+                val absoluteMatcher = fs.getPathMatcher("glob:**/$pattern")
+                (relativePath != null && matcher.matches(relativePath))
+                        || matcher.matches(absolutePath)
+                        || absoluteMatcher.matches(absolutePath)
             }.getOrDefault(false)
         }
     }
