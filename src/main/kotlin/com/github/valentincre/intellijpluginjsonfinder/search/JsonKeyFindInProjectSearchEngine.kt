@@ -56,7 +56,7 @@ private class JsonKeySearcher(
                 matchingKeys.flatMap { key ->
                     project.service<JsonFinderProjectService>()
                         .findDefinitions(key)
-                        .mapNotNull { def -> def.virtualFile }
+                        .map { it.virtualFile }
                 }.distinctBy { it.path }
             } catch (e: ProcessCanceledException) {
                 throw e

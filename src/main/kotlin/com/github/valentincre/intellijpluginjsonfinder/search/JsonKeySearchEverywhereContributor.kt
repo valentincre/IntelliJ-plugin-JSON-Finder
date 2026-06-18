@@ -25,7 +25,7 @@ class JsonKeySearchEverywhereContributor(
 ) : SearchEverywhereContributor<ResolvedKeyDefinition> {
 
     override fun getSearchProviderId(): String = "JsonKeySearchEverywhereContributor"
-    override fun getGroupName(): String = "JSON Keys"
+    override fun getGroupName(): String = "JSON keys"
     override fun getSortWeight(): Int = 600
     override fun showInFindResults(): Boolean = false
     override fun isDumbAware(): Boolean = false

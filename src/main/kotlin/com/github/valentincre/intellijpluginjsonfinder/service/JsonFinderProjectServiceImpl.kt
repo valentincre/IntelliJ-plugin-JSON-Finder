@@ -70,12 +70,13 @@ class JsonFinderProjectServiceImpl(private val project: Project) : JsonFinderPro
         if (tier1.isNotEmpty()) return tier1
 
         // Tier 2: Segment-aware Levenshtein fallback
-        return allKeys
+        return allKeys.asSequence()
             .map { key -> key to FuzzyMatchUtil.segmentLevenshtein(normalizedQuery, key) }
             .filter { (_, score) -> score < FuzzyMatchUtil.SEGMENT_MISMATCH_PENALTY }
             .sortedBy { (_, score) -> score }
             .take(maxResults)
             .map { (key, _) -> key }
+            .toList()
     }
 
     override fun isValidKeyPath(text: String): Boolean = KeyPathUtil.isKeyPathCandidate(text)

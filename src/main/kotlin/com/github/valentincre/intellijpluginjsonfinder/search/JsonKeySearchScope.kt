@@ -14,7 +14,7 @@ import com.intellij.psi.search.GlobalSearchScope
  */
 class JsonKeySearchScope(project: Project) : GlobalSearchScope(project) {
 
-    override fun getDisplayName(): String = "JSON Keys"
+    override fun getDisplayName(): String = "JSON keys"
 
     override fun contains(file: VirtualFile): Boolean =
         file.extension == "json" && !isExcluded(file)
