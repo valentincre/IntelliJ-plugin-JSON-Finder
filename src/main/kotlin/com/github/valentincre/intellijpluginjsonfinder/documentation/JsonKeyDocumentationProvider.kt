@@ -1,6 +1,7 @@
 package com.github.valentincre.intellijpluginjsonfinder.documentation
 
 import com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectService
+import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
 import com.github.valentincre.intellijpluginjsonfinder.util.KeyPathUtil
 import com.intellij.lang.documentation.AbstractDocumentationProvider
 import com.intellij.openapi.components.service
@@ -25,6 +26,7 @@ class JsonKeyDocumentationProvider : AbstractDocumentationProvider() {
         targetOffset: Int,
     ): PsiElement? {
         contextElement ?: return null
+        if (!contextElement.project.service<JsonFinderSettings>().state.isEnabled) return null
         val rawText = contextElement.text ?: return null
         val stripped = stripQuotes(rawText) ?: return null
         if (!KeyPathUtil.isKeyPathCandidate(stripped)) return null

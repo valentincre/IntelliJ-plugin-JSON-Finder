@@ -1,6 +1,7 @@
 package com.github.valentincre.intellijpluginjsonfinder.navigation
 
 import com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectService
+import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
 import com.github.valentincre.intellijpluginjsonfinder.util.KeyPathUtil
 import com.intellij.codeInsight.navigation.actions.GotoDeclarationHandler
 import com.intellij.navigation.ItemPresentation
@@ -73,6 +74,7 @@ class JsonKeyGotoHandler : GotoDeclarationHandler {
         if (!KeyPathUtil.isKeyPathCandidate(stripped)) return null
 
         val project = sourceElement.project
+        if (!project.service<JsonFinderSettings>().state.isEnabled) return null
         // The IDE already holds a read lock when invoking GotoDeclarationHandler —
         // no explicit ReadAction wrapper is needed here.
         val definitions = project.service<JsonFinderProjectService>().findDefinitions(stripped)

@@ -1,5 +1,7 @@
 package com.github.valentincre.intellijpluginjsonfinder.navigation
 
+import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
+import com.intellij.openapi.components.service
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 
 // Integration tests for JsonKeyGotoHandler detection logic (Story 2.1).
@@ -126,6 +128,26 @@ class JsonKeyGotoHandlerTest : BasePlatformTestCase() {
         for (target in targets!!) {
             assertTrue("All targets must come from a valid VirtualFile", target.containingFile.virtualFile.isValid)
             assertEquals("Only en.json should remain after fr.json deletion", "en.json", target.containingFile.name)
+        }
+    }
+
+    // ─── Plugin disabled (Story 7.1 — AC4) ───────────────────────────────────
+
+    fun testGotoHandlerReturnsNullWhenPluginDisabled() {
+        project.service<JsonFinderSettings>().loadState(
+            project.service<JsonFinderSettings>().state.copy(isEnabled = false)
+        )
+        try {
+            myFixture.configureByFile("single-match/en.json")
+            myFixture.configureByText("consumer.json", "{\"ref\": \"<caret>auth.login.button\"}")
+            val handler = JsonKeyGotoHandler()
+            val element = myFixture.file.findElementAt(myFixture.caretOffset)
+            val targets = handler.getGotoDeclarationTargets(element, myFixture.caretOffset, myFixture.editor)
+            assertNull("Expected null targets when plugin is disabled", targets)
+        } finally {
+            project.service<JsonFinderSettings>().loadState(
+                project.service<JsonFinderSettings>().state.copy(isEnabled = true)
+            )
         }
     }
 }

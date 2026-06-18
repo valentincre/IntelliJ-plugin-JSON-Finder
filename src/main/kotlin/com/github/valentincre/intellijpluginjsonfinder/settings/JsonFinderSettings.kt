@@ -23,6 +23,7 @@ class JsonFinderSettings : PersistentStateComponent<JsonFinderSettings.State> {
     }
 
     data class State(
+        var isEnabled: Boolean = true,
         var includePatterns: List<String> = DEFAULT_INCLUDE_PATTERNS,
         var excludePatterns: List<String> = DEFAULT_EXCLUDE_PATTERNS,
     )

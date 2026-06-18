@@ -2,6 +2,7 @@ package com.github.valentincre.intellijpluginjsonfinder.documentation
 
 import com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectService
 import com.github.valentincre.intellijpluginjsonfinder.service.ResolvedKeyDefinition
+import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
 import com.github.valentincre.intellijpluginjsonfinder.util.KeyPathUtil
 import com.intellij.openapi.components.service
 import com.intellij.openapi.progress.ProcessCanceledException
@@ -23,6 +24,7 @@ class JsonKeyDocumentationTargetProvider : DocumentationTargetProvider {
 
     override fun documentationTargets(file: PsiFile, offset: Int): List<DocumentationTarget> {
         val element = file.findElementAt(offset) ?: return emptyList()
+        if (!element.project.service<JsonFinderSettings>().state.isEnabled) return emptyList()
         val stripped = extractKeyPath(element) ?: return emptyList()
         val definitions = try {
             element.project.service<JsonFinderProjectService>().findDefinitions(stripped)

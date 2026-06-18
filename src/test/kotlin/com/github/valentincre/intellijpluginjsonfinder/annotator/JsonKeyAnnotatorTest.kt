@@ -1,9 +1,11 @@
 package com.github.valentincre.intellijpluginjsonfinder.annotator
 
+import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
 import com.github.valentincre.intellijpluginjsonfinder.util.KeyPathUtil
 import com.intellij.lang.annotation.AnnotationBuilder
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.HighlightSeverity
+import com.intellij.openapi.components.service
 import com.intellij.psi.PsiElement
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import java.lang.reflect.Method
@@ -251,6 +253,25 @@ class JsonKeyAnnotatorTest : BasePlatformTestCase() {
             "Expected no quick-fixes for key with no close match",
             annotations.first().fixNames.isEmpty(),
         )
+    }
+
+    // ─── Plugin disabled (Story 7.1 — AC3) ───────────────────────────────────
+
+    fun testAnnotatorProducesNoWarningWhenPluginDisabled() {
+        // Disable the plugin for this project; the annotator must skip all checks.
+        project.service<JsonFinderSettings>().loadState(
+            project.service<JsonFinderSettings>().state.copy(isEnabled = false)
+        )
+        try {
+            myFixture.configureByFile("en.json")
+            myFixture.configureByText("consumer.json", """{"ref": "<caret>auth.login.missing"}""")
+            val warnings = annotateAtCaret().filter { it.severity == HighlightSeverity.WARNING }
+            assertTrue("Expected no WARNING when plugin is disabled", warnings.isEmpty())
+        } finally {
+            project.service<JsonFinderSettings>().loadState(
+                project.service<JsonFinderSettings>().state.copy(isEnabled = true)
+            )
+        }
     }
 
     fun testQuickFixReplacesTextInFile() {

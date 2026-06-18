@@ -1,6 +1,7 @@
 package com.github.valentincre.intellijpluginjsonfinder.annotator
 
 import com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectService
+import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
 import com.github.valentincre.intellijpluginjsonfinder.util.KeyPathUtil
 import com.intellij.lang.annotation.AnnotationHolder
 import com.intellij.lang.annotation.Annotator
@@ -55,6 +56,7 @@ class JsonKeyAnnotator : Annotator {
         if (parentStripped == stripped) return
 
         val project = element.project
+        if (!project.service<JsonFinderSettings>().state.isEnabled) return
         // Skip during dumb mode (initial indexing) — index is not ready yet.
         if (DumbService.isDumb(project)) return
         try {

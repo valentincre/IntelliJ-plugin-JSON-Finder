@@ -3,6 +3,7 @@ package com.github.valentincre.intellijpluginjsonfinder.search
 import com.github.valentincre.intellijpluginjsonfinder.index.JsonKeyIndex
 import com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectService
 import com.github.valentincre.intellijpluginjsonfinder.service.ResolvedKeyDefinition
+import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
 import com.intellij.ide.actions.searcheverywhere.SearchEverywhereContributor
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.application.ReadAction
@@ -36,6 +37,7 @@ class JsonKeySearchEverywhereContributor(
         progressIndicator: ProgressIndicator,
         consumer: Processor<in ResolvedKeyDefinition>,
     ) {
+        if (!project.service<JsonFinderSettings>().state.isEnabled) return
         val query = pattern.lowercase().trim()
         if (query.isBlank()) return
 

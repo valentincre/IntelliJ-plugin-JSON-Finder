@@ -12,6 +12,7 @@ import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.indexing.FileBasedIndex
 import com.github.valentincre.intellijpluginjsonfinder.index.JsonKeyIndex
 import com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectService
+import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
 
 /**
  * Index-backed FindInProjectSearchEngine that intercepts searches made with the "JSON Keys" scope.
@@ -44,6 +45,7 @@ private class JsonKeySearcher(
 ) : FindInProjectSearchEngine.FindInProjectSearcher {
 
     override fun searchForOccurrences(): Collection<VirtualFile> {
+        if (!project.service<JsonFinderSettings>().state.isEnabled) return emptyList()
         val query = findModel.stringToFind.lowercase().trim()
         if (query.isBlank()) return emptyList()
 

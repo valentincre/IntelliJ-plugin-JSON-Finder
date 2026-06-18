@@ -57,6 +57,7 @@ class JsonKeyIndex : FileBasedIndexExtension<String, List<JsonKeyEntry>>() {
             ?: openProjects.firstOrNull()
             ?: return@InputFilter false
         val settings = project.service<JsonFinderSettings>().state
+        if (!settings.isEnabled) return@InputFilter false
         val basePath = project.basePath
             ?: ProjectRootManager.getInstance(project).contentRoots.firstOrNull()?.path
         matchesInclude(file, settings.includePatterns, basePath) && !matchesExclude(file, settings.excludePatterns, basePath)
