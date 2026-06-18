@@ -16,16 +16,15 @@
             serviceInterface="com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectService"
             serviceImplementation="com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectServiceImpl"/>
         <gotoDeclarationHandler implementation="com.github.valentincre.intellijpluginjsonfinder.navigation.JsonKeyGotoHandler"/>
-        <lang.documentationProvider
-            implementation="com.github.valentincre.intellijpluginjsonfinder.documentation.JsonKeyDocumentationProvider"
-            language="any"/>
         <platform.backend.documentation.targetProvider
             implementation="com.github.valentincre.intellijpluginjsonfinder.documentation.JsonKeyDocumentationTargetProvider"/>
       <!-- inspection slot (Epic 5) — replaces per-language annotators; severity configurable via Settings → Editor → Inspections → JSON Finder -->
       <localInspection
               implementationClass="com.github.valentincre.intellijpluginjsonfinder.inspection.JsonKeyInspection"
-              groupName="JSON Finder"
-              displayName="Unresolved JSON key reference"
+              language=""
+              bundle="messages.JsonFinderBundle"
+              groupKey="inspection.json.key.unresolved.group.name"
+              key="inspection.json.key.unresolved.display.name"
               shortName="JsonKeyUnresolvedReference"
               enabledByDefault="true"
               level="WEAK WARNING"/>
@@ -36,11 +35,11 @@
             id="JsonKeySearchEverywhereContributor"
             implementation="com.github.valentincre.intellijpluginjsonfinder.search.JsonKeySearchEverywhereContributorFactory"/>
         <!-- settings slot (Epic 6) -->
-        <projectService serviceImplementation="com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings"/>
         <projectConfigurable
             id="com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderConfigurable"
             instance="com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderConfigurable"
-            displayName="JSON Finder"
+            bundle="messages.JsonFinderBundle"
+            key="configurable.json.finder.display.name"
             groupId="tools"/>
     </extensions>
 </idea-plugin>

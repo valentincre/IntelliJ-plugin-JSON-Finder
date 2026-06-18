@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150">
+  <defs>
+    <mask id="a" maskUnits="userSpaceOnUse">
+      <path fill="#fff" d="M0 0h210v200H0z"/>
+      <rect width="64.183" height="109.5" x="13" y="50.25" rx="2"/>
+      <rect width="64.183" height="109.5" x="140.36" y="50.25" rx="2"/>
+    </mask>
+    <mask id="b" maskUnits="userSpaceOnUse">
+      <path fill="#fff" d="M0 0h210v200H0z"/>
+      <rect width="64.183" height="109.5" x="13" y="50.25" rx="2"/>
+      <rect width="64.183" height="109.5" x="140.36" y="50.25" rx="2"/>
+    </mask>
+  </defs>
+  <title>JSON Finder icon</title>
+  <desc>Accolades JSON violettes encadrant des lignes de clés avec un curseur lumineux</desc>
+  <text x="-15.732" y="74.049" fill="#7f77dd" dominant-baseline="central" font-family="monospace" font-size="90" font-weight="700" style="color:#000;font-weight:700;font-size:90px;font-family:monospace;dominant-baseline:central;text-anchor:start;opacity:1;fill:#7f77dd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter">{</text>
+  <text x="111.628" y="74.049" fill="#7f77dd" dominant-baseline="central" font-family="monospace" font-size="90" font-weight="700" style="color:#000;font-weight:700;font-size:90px;font-family:monospace;dominant-baseline:central;text-anchor:start;opacity:1;fill:#7f77dd;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter">}</text>
+  <path stroke="#5dcaa5" stroke-dasharray="5 5" stroke-linecap="round" stroke-width="4" d="M58 68h90" mask="url(#a)" style="color:#000;font-weight:400;font-size:16px;font-family:&quot;Anthropic Sans&quot;,&quot;-apple-system&quot;,BlinkMacSystemFont,&quot;Segoe UI&quot;,sans-serif;dominant-baseline:auto;text-anchor:start;opacity:1;fill:#000;stroke:#5dcaa5;stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:5px,5px" transform="translate(-33.732 -30.951)"/>
+  <path stroke="#5dcaa5" stroke-dasharray="5 5" stroke-linecap="round" stroke-width="4" d="M58 88h82" mask="url(#a)" style="color:#000;font-weight:400;font-size:16px;font-family:&quot;Anthropic Sans&quot;,&quot;-apple-system&quot;,BlinkMacSystemFont,&quot;Segoe UI&quot;,sans-serif;dominant-baseline:auto;text-anchor:start;opacity:1;fill:#000;stroke:#5dcaa5;stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:5px,5px" transform="translate(-33.732 -30.951)"/>
+  <rect width="75.074" height="16" x="37.194" y="69.049" fill="#ef9f27" fill-opacity=".25" rx="4.08" style="color:#000;font-weight:400;font-size:16px;font-family:&quot;Anthropic Sans&quot;,&quot;-apple-system&quot;,BlinkMacSystemFont,&quot;Segoe UI&quot;,sans-serif;dominant-baseline:auto;text-anchor:start;opacity:1;fill:#ef9f27;stroke:none;stroke-width:.903338px;stroke-linecap:butt;stroke-linejoin:miter"/>
+  <path stroke="#ef9f27" stroke-dasharray="5 5" stroke-linecap="round" stroke-width="4" d="M58 108h86" mask="url(#a)" style="color:#000;font-weight:400;font-size:16px;font-family:&quot;Anthropic Sans&quot;,&quot;-apple-system&quot;,BlinkMacSystemFont,&quot;Segoe UI&quot;,sans-serif;dominant-baseline:auto;text-anchor:start;opacity:1;fill:#000;stroke:#ef9f27;stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:5px,5px" transform="translate(-33.732 -30.951)"/>
+  <path stroke="#5dcaa5" stroke-dasharray="5 5" stroke-linecap="round" stroke-width="4" d="M58 144h84" mask="url(#a)" style="color:#000;font-weight:400;font-size:16px;font-family:&quot;Anthropic Sans&quot;,&quot;-apple-system&quot;,BlinkMacSystemFont,&quot;Segoe UI&quot;,sans-serif;dominant-baseline:auto;text-anchor:start;opacity:1;fill:#000;stroke:#5dcaa5;stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:5px,5px" transform="translate(-33.732 -30.951)"/>
+  <path stroke="#5dcaa5" stroke-dasharray="5 5" stroke-linecap="round" stroke-width="4" d="M58 144h84" mask="url(#b)" style="color:#000;font-weight:400;font-size:16px;font-family:&quot;Anthropic Sans&quot;,&quot;-apple-system&quot;,BlinkMacSystemFont,&quot;Segoe UI&quot;,sans-serif;dominant-baseline:auto;text-anchor:start;fill:#000;stroke:#5dcaa5;stroke-width:4px;stroke-linecap:round;stroke-linejoin:miter;stroke-dasharray:5px,5px" transform="translate(-33.855 -48.512)"/>
+  <path fill="#ef9f27" d="m155 132 3-9 8 6-6-11 9-4-23-4z" style="color:#000;font-weight:400;font-size:16px;font-family:&quot;Anthropic Sans&quot;,&quot;-apple-system&quot;,BlinkMacSystemFont,&quot;Segoe UI&quot;,sans-serif;dominant-baseline:auto;text-anchor:start;opacity:1;fill:#ef9f27;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter" transform="translate(-38.019 -32.442)"/>
+</svg>
