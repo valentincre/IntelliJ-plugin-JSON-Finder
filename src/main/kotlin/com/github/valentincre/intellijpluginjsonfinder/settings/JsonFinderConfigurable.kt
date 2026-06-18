@@ -1,6 +1,6 @@
 package com.github.valentincre.intellijpluginjsonfinder.settings
 
-import com.github.valentincre.intellijpluginjsonfinder.index.JsonKeyIndex
+import com.github.valentincre.intellijpluginjsonfinder.index.KEY
 import com.intellij.openapi.components.service
 import com.intellij.openapi.options.Configurable
 import com.intellij.openapi.project.Project
@@ -55,7 +55,7 @@ class JsonFinderConfigurable(private val project: Project) : Configurable {
                 excludePatterns = parsePatterns(excludeArea?.text),
             )
         )
-        FileBasedIndex.getInstance().requestRebuild(JsonKeyIndex.KEY)
+        FileBasedIndex.getInstance().requestRebuild(KEY)
     }
 
     override fun reset() {

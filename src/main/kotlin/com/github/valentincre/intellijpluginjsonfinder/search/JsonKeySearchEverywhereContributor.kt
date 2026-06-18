@@ -1,6 +1,6 @@
 package com.github.valentincre.intellijpluginjsonfinder.search
 
-import com.github.valentincre.intellijpluginjsonfinder.index.JsonKeyIndex
+import com.github.valentincre.intellijpluginjsonfinder.index.KEY
 import com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectService
 import com.github.valentincre.intellijpluginjsonfinder.service.ResolvedKeyDefinition
 import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
@@ -44,7 +44,7 @@ class JsonKeySearchEverywhereContributor(
         val results = try {
             ReadAction.nonBlocking<List<ResolvedKeyDefinition>> {
                 val matchingKeys = mutableListOf<String>()
-                FileBasedIndex.getInstance().processAllKeys(JsonKeyIndex.KEY, { key ->
+                FileBasedIndex.getInstance().processAllKeys(KEY, { key ->
                     if (key.lowercase().contains(query)) matchingKeys.add(key)
                     true
                 }, project)

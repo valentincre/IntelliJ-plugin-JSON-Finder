@@ -33,7 +33,6 @@ import java.io.DataOutput
 class JsonKeyIndex : FileBasedIndexExtension<String, List<JsonKeyEntry>>() {
 
     companion object {
-        val KEY: ID<String, List<JsonKeyEntry>> = ID.create("JsonKeyIndex")
         private const val INDEX_VERSION = 2  // bumped from 1: now reads settings glob patterns
     }
 
@@ -127,3 +126,5 @@ private object JsonKeyEntryListExternalizer : DataExternalizer<List<JsonKeyEntry
         }
     }
 }
+
+val KEY: ID<String, List<JsonKeyEntry>> = ID.create("JsonKeyIndex")

@@ -3,7 +3,6 @@ package com.github.valentincre.intellijpluginjsonfinder.index
 import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
 import com.intellij.openapi.components.service
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
-import com.intellij.util.indexing.FileBasedIndex
 import com.intellij.util.indexing.FileContentImpl
 
 /**

@@ -28,8 +28,8 @@ class JsonKeyDocumentationTargetProvider : DocumentationTargetProvider {
         val stripped = extractKeyPath(element) ?: return emptyList()
         val definitions = try {
             element.project.service<JsonFinderProjectService>().findDefinitions(stripped)
-        } catch (_: ProcessCanceledException) {
-            return emptyList()
+        } catch (e: ProcessCanceledException) {
+            throw e
         } catch (_: IndexNotReadyException) {
             return emptyList()
         } catch (e: Exception) {

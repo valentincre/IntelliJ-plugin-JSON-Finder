@@ -1,6 +1,6 @@
 package com.github.valentincre.intellijpluginjsonfinder.service
 
-import com.github.valentincre.intellijpluginjsonfinder.index.JsonKeyIndex
+import com.github.valentincre.intellijpluginjsonfinder.index.KEY
 import com.github.valentincre.intellijpluginjsonfinder.util.FuzzyMatchUtil
 import com.github.valentincre.intellijpluginjsonfinder.util.KeyPathUtil
 import com.intellij.openapi.application.ApplicationManager
@@ -27,7 +27,7 @@ class JsonFinderProjectServiceImpl(private val project: Project) : JsonFinderPro
         val results = mutableListOf<ResolvedKeyDefinition>()
         withReadAccess {
             FileBasedIndex.getInstance().processValues(
-                JsonKeyIndex.KEY,
+                KEY,
                 normalizedPath,
                 null,
                 { file, entries ->
@@ -50,12 +50,12 @@ class JsonFinderProjectServiceImpl(private val project: Project) : JsonFinderPro
             val scope = GlobalSearchScope.allScope(project)
             val fbi = FileBasedIndex.getInstance()
             val keys = mutableListOf<String>()
-            fbi.processAllKeys(JsonKeyIndex.KEY, { key ->
+            fbi.processAllKeys(KEY, { key ->
                 // Only include keys that have a backing file within the project scope.
                 // processAllKeys(project) can return keys from IntelliJ's global shared index or
                 // other open projects — verifying via getContainingFiles guarantees we only
                 // suggest keys that actually exist in this project.
-                if (fbi.getContainingFiles(JsonKeyIndex.KEY, key, scope).isNotEmpty()) {
+                if (fbi.getContainingFiles(KEY, key, scope).isNotEmpty()) {
                     keys.add(key)
                 }
                 true

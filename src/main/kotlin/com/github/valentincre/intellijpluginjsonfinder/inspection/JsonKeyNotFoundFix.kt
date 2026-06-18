@@ -1,4 +1,4 @@
-package com.github.valentincre.intellijpluginjsonfinder.annotator
+package com.github.valentincre.intellijpluginjsonfinder.inspection
 
 import com.intellij.codeInspection.LocalQuickFixAndIntentionActionOnPsiElement
 import com.intellij.openapi.editor.Editor

@@ -5,7 +5,7 @@ import com.intellij.psi.search.GlobalSearchScope
 import com.intellij.testFramework.IndexingTestUtil
 import com.intellij.testFramework.fixtures.BasePlatformTestCase
 import com.intellij.util.indexing.FileBasedIndex
-import com.github.valentincre.intellijpluginjsonfinder.index.JsonKeyIndex
+import com.github.valentincre.intellijpluginjsonfinder.index.KEY
 
 // Warm-query benchmark (AC3 — NFR1: < 50ms per lookup — Story 1.4).
 //
@@ -46,7 +46,7 @@ class WarmQueryBenchmarkTest : BasePlatformTestCase() {
         var indexHasEntries = false
         ReadAction.compute<Unit, Throwable> {
             FileBasedIndex.getInstance().processValues(
-                JsonKeyIndex.KEY, "section_0.key_0", null,
+                KEY, "section_0.key_0", null,
                 { _, _ -> indexHasEntries = true; true },
                 scope,
             )
@@ -56,7 +56,7 @@ class WarmQueryBenchmarkTest : BasePlatformTestCase() {
         // Warm-up call: first invocation may include lazy initialization overhead
         ReadAction.compute<Unit, Throwable> {
             FileBasedIndex.getInstance().processValues(
-                JsonKeyIndex.KEY, "section_0.key_0", null, { _, _ -> true }, scope,
+                KEY, "section_0.key_0", null, { _, _ -> true }, scope,
             )
         }
 
@@ -66,7 +66,7 @@ class WarmQueryBenchmarkTest : BasePlatformTestCase() {
             val start = System.nanoTime()
             ReadAction.compute<Unit, Throwable> {
                 FileBasedIndex.getInstance().processValues(
-                    JsonKeyIndex.KEY, "section_0.key_0", null, { _, _ -> true }, scope,
+                    KEY, "section_0.key_0", null, { _, _ -> true }, scope,
                 )
             }
             timings[i] = (System.nanoTime() - start) / 1_000_000L
@@ -79,7 +79,7 @@ class WarmQueryBenchmarkTest : BasePlatformTestCase() {
         println("Warm query timings (ms): ${timings.joinToString()} -> min=$minMs max=$maxMs avg=$avgMs")
 
         assertTrue(
-            "All ${REPEAT_COUNT} warm queries must complete in < ${MAX_QUERY_MS}ms (NFR1); max measured: ${maxMs}ms",
+            "All $REPEAT_COUNT warm queries must complete in < ${MAX_QUERY_MS}ms (NFR1); max measured: ${maxMs}ms",
             maxMs < MAX_QUERY_MS,
         )
     }

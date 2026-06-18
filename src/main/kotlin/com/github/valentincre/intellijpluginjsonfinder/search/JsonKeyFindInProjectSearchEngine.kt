@@ -10,7 +10,7 @@ import com.intellij.openapi.project.IndexNotReadyException
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.util.indexing.FileBasedIndex
-import com.github.valentincre.intellijpluginjsonfinder.index.JsonKeyIndex
+import com.github.valentincre.intellijpluginjsonfinder.index.KEY
 import com.github.valentincre.intellijpluginjsonfinder.service.JsonFinderProjectService
 import com.github.valentincre.intellijpluginjsonfinder.settings.JsonFinderSettings
 
@@ -52,7 +52,7 @@ private class JsonKeySearcher(
         return ReadAction.nonBlocking<Collection<VirtualFile>> {
             try {
                 val allKeys = FileBasedIndex.getInstance()
-                    .getAllKeys(JsonKeyIndex.KEY, project)
+                    .getAllKeys(KEY, project)
                 val matchingKeys = allKeys.filter { it.contains(query) }
 
                 matchingKeys.flatMap { key ->

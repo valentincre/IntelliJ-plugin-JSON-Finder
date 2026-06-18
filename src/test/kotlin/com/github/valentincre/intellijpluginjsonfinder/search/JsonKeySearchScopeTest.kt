@@ -59,7 +59,7 @@ class JsonKeySearchScopeTest : BasePlatformTestCase() {
         val engine = JsonKeyFindInProjectSearchEngine()
         val searcher = engine.createSearcher(findModel, project)
         assertNotNull("Engine must return a searcher when JSON Keys scope is active", searcher)
-        assertTrue("Searcher must be reliable", searcher!!.isReliable())
+        assertTrue("Searcher must be reliable", searcher!!.isReliable)
     }
 
     // ─── Search: results match only key definitions ────────────────────────

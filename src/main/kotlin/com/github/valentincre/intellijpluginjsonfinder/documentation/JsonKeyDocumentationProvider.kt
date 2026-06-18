@@ -35,8 +35,8 @@ class JsonKeyDocumentationProvider : AbstractDocumentationProvider() {
                 .service<JsonFinderProjectService>()
                 .findDefinitions(stripped)
             if (definitions.isEmpty()) null else contextElement
-        } catch (_: ProcessCanceledException) {
-            null  // Platform will retry; do not re-throw here (called from EDT in some paths)
+        } catch (e: ProcessCanceledException) {
+            throw e
         } catch (_: IndexNotReadyException) {
             null
         } catch (e: Exception) {
